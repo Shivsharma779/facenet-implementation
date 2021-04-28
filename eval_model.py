@@ -1,3 +1,8 @@
+from skimage import io
+import numpy as np
+import torch
+import os
+
 def all_pairs_euclid_torch(A, B):
 	#
 	sqrA = torch.sum(torch.pow(A, 2), 1, keepdim=True).expand(A.shape[0], B.shape[0])
@@ -6,7 +11,7 @@ def all_pairs_euclid_torch(A, B):
 	return torch.sqrt(sqrA - 2*torch.mm(A, B.t()) + sqrB)
 
 
-def testValues(model, trainSetMapping, trainSet,loader):
+def testValues(model, embedding_size, transform, trainSetMapping, trainSet, loader):
 
     model.eval()
 

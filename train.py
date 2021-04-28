@@ -2,6 +2,8 @@ import json
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+import pickle
+
 from time import time
 from eval_model import testValues
 from DataLoader import TripletDataset
@@ -80,7 +82,7 @@ def main():
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                                 ])
 
-    trainSet = TripletDataset(rootPath, trainSetMapping, 10000, transform)
+    trainSet = TripletDataset(rootPath, trainSetMapping, 1000, transform)
     validSet = TripletDataset(rootPath, validSetMapping, 4000, transform, phase="test")
     testSet = TripletDataset(rootPathLFW, labelToImageMappingLFW, 2000, transform, phase="test")
 
@@ -100,86 +102,85 @@ def main():
     criterion = nn.TripletMarginLoss(margin=margin, reduction="mean")
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 
-    train(model, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader , valid_loader, test_loader, optimizer, criterion, margin,epochs)
+    train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader , valid_loader, test_loader, optimizer, criterion, margin,epochs)
 
 
-def train(model, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader, valid_loader, test_loader, optimizer, criterion, margin,epochs):
-    validationAccuracyList = []
-    testAccuracyList = []
+def train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader, valid_loader, test_loader, optimizer, criterion, margin,epochs):
+  validationAccuracyList = []
+  testAccuracyList = []
 
-    lossListTrain = []
-    lossListLFW = []
+  lossListTrain = []
+  lossListLFW = []
 
-    epochs = 100
+  epochs = 100
 
-    training_loss = 0
-    lfw_loss = 0
-    maxAccuracy = 0
+  training_loss = 0
+  lfw_loss = 0
+  maxAccuracy = 0
 
-    for i in range(epochs):
-        
-        start = time()
+  for i in range(epochs):
+      
+      start = time()
 
-        training_loss = tripletLossTrain(train_loader, model, optimizer, criterion, margin)
-        lfw_loss = tripletLossValid(test_loader, model, criterion, margin)
-        
-        
-        lossListTrain.append(training_loss)
-        lossListLFW.append(lfw_loss)
-    #     scheduler.step(lfw_loss)
-        
+      training_loss = tripletLossTrain(train_loader, model, optimizer, criterion, margin)
+      lfw_loss = tripletLossValid(test_loader, model, criterion, margin)
+      
+      
+      lossListTrain.append(training_loss)
+      lossListLFW.append(lfw_loss)
+  #     scheduler.step(lfw_loss)
+      
 
-        print("Epoch", i, "Training Loss:", training_loss)
-        print("Epoch", i, "LFW Loss:", lfw_loss)
-        
-        validAccuracy = testValues(model, trainSetMapping, trainSet,valid_loader).item()
-        testAccuracy = testValues(model, labelToImageMappingLFW, testSet,test_loader).item()
-        
-        validationAccuracyList.append(validAccuracy)
-        testAccuracyList.append(testAccuracy)
-        
-        print("Validation accuracy:", validAccuracy)
-        print("Test accuracy:", testAccuracy)
-        
-        if validAccuracy > maxAccuracy:
-            maxAccuracy = validAccuracy
-            
-            torch.save({
-                        'epoch': i,
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
-                        'scheduler_state_dict': scheduler.state_dict()
-                        }, "checkpoint.pth")
-            
+      print("Epoch", i, "Training Loss:", training_loss)
+      print("Epoch", i, "LFW Loss:", lfw_loss)
+      
+      validAccuracy = testValues(model, embedding_size,transform, trainSetMapping, trainSet,valid_loader).item()
+      testAccuracy = testValues(model, embedding_size,transform, labelToImageMappingLFW, testSet,test_loader).item()
+      
+      validationAccuracyList.append(validAccuracy)
+      testAccuracyList.append(testAccuracy)
+      
+      print("Validation accuracy:", validAccuracy)
+      print("Test accuracy:", testAccuracy)
+      
+      if validAccuracy > maxAccuracy:
+          maxAccuracy = validAccuracy
+          
+          torch.save({
+                      'epoch': i,
+                      'model_state_dict': model.state_dict(),
+                      'optimizer_state_dict': optimizer.state_dict()
+                      }, "checkpoint.pth")
+          
 
-        print("Total time:", (time() - start))
-        
-        if i % 15 == 0:
-            with open("validationAccuracyList.picke", "wb") as f:
-                pickle.dump(validationAccuracyList, f)
-                
-            with open("testAccuracyList.picke", "wb") as f:
-                pickle.dump(testAccuracyList, f)
-                
-            with open("lossListTrain.picke", "wb") as f:
-                pickle.dump(lossListTrain, f)
-                
-            with open("lossListLFW.picke", "wb") as f:
-                pickle.dump(lossListLFW, f)
-        
-        trainSet.regenerateTriplets()
+      print("Total time:", (time() - start))
+      
+      if i % 15 == 0:
+          with open("validationAccuracyList.picke", "wb") as f:
+              pickle.dump(validationAccuracyList, f)
+              
+          with open("testAccuracyList.picke", "wb") as f:
+              pickle.dump(testAccuracyList, f)
+              
+          with open("lossListTrain.picke", "wb") as f:
+              pickle.dump(lossListTrain, f)
+              
+          with open("lossListLFW.picke", "wb") as f:
+              pickle.dump(lossListLFW, f)
+      
+      trainSet.regenerateTriplets()
 
-    with open("validationAccuracyList.picke", "wb") as f:
-        pickle.dump(validationAccuracyList, f)
-        
-    with open("testAccuracyList.picke", "wb") as f:
-        pickle.dump(testAccuracyList, f)
-        
-    with open("lossListTrain.picke", "wb") as f:
-        pickle.dump(lossListTrain, f)
-        
-    with open("lossListLFW.picke", "wb") as f:
-        pickle.dump(lossListLFW, f)
+  with open("validationAccuracyList.picke", "wb") as f:
+      pickle.dump(validationAccuracyList, f)
+      
+  with open("testAccuracyList.picke", "wb") as f:
+      pickle.dump(testAccuracyList, f)
+      
+  with open("lossListTrain.picke", "wb") as f:
+      pickle.dump(lossListTrain, f)
+      
+  with open("lossListLFW.picke", "wb") as f:
+      pickle.dump(lossListLFW, f)
 
 
 if __name__ == "__main__":
