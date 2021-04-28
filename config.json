@@ -1,4 +1,9 @@
 {
     "splitRatio": 0.8,
-    "margin": 1.9
+    "margin": 1.9,
+    "batch_size": 32,
+    "embedding_size": 128,
+    "epochs": 60,
+    "rootPath": "./final_dataset",
+    "rootPathLFW": "./lfw-deepfunneled"
 }
