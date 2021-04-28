@@ -149,7 +149,7 @@ def train(model, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, tra
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'scheduler_state_dict': scheduler.state_dict()
-                        }, "checkpoint_gnet.pth")
+                        }, "checkpoint.pth")
             
 
         print("Total time:", (time() - start))

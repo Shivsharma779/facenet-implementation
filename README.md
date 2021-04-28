@@ -15,3 +15,6 @@ bash scripts.sh
 ```
 python train.py
 ```
+
+
+Model will be generated under the name `checkpoint.pth`
