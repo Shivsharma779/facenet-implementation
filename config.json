@@ -3,7 +3,7 @@
     "margin": 0.7,
     "batch_size": 32,
     "embedding_size": 128,
-    "epochs": 60,
+    "epochs": 150,
     "rootPath": "./final_dataset",
     "rootPathLFW": "./lfw-deepfunneled"
 }
