@@ -15,6 +15,27 @@ import matplotlib.image as mpimg
 import os
 
 
+def getModel(train_on_gpu, embedding_size, margin):
+    model = ResnetFaceNet(embedding_size, pretrained=True)
+
+    if train_on_gpu:
+        model.cuda()
+
+    optimizer = torch.optim.Adam(model.parameters(),lr = 0.0003)
+
+    criterion = nn.TripletMarginLoss(margin=margin, reduction="mean")
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
+
+
+    if os.path.exists("checkpoint.pth"):
+        print("Loading from checkpoint file..")
+        checkpoint = torch.load("./checkpoint.pth")
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+    
+    return model, optimizer, criterion, scheduler
+
 def tripletLossTrain(loader, model, optimizer, criterion, margin):
     training_loss = 0
     
@@ -89,30 +110,19 @@ def main():
     train_loader = torch.utils.data.DataLoader(trainSet, batch_size=batch_size, shuffle=True)
     valid_loader = torch.utils.data.DataLoader(validSet, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(testSet, batch_size=batch_size, shuffle=True)
+    
 
-    model = ResnetFaceNet(embedding_size, pretrained=True)
-    #model.load_state_dict(checkpoint['model_state_dict'])
+    model, optimizer, criterion, scheduler = getModel(train_on_gpu, embedding_size, margin)
 
-    if train_on_gpu:
-        model.cuda()
-
-    optimizer = torch.optim.Adam(model.parameters(),lr = 0.0003)
-    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-
-    criterion = nn.TripletMarginLoss(margin=margin, reduction="mean")
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
-
-    train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader , valid_loader, test_loader, optimizer, criterion, margin,epochs)
+    train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader , valid_loader, test_loader, optimizer, criterion, scheduler, margin,epochs)
 
 
-def train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader, valid_loader, test_loader, optimizer, criterion, margin,epochs):
+def train(model, embedding_size, transform, trainSetMapping, labelToImageMappingLFW, trainSet, testSet, train_loader, valid_loader, test_loader, optimizer, criterion, scheduler,margin,epochs):
   validationAccuracyList = []
   testAccuracyList = []
 
   lossListTrain = []
   lossListLFW = []
-
-  epochs = 100
 
   training_loss = 0
   lfw_loss = 0
@@ -128,7 +138,7 @@ def train(model, embedding_size, transform, trainSetMapping, labelToImageMapping
       
       lossListTrain.append(training_loss)
       lossListLFW.append(lfw_loss)
-  #     scheduler.step(lfw_loss)
+      scheduler.step(lfw_loss)
       
 
       print("Epoch", i, "Training Loss:", training_loss)
@@ -149,37 +159,38 @@ def train(model, embedding_size, transform, trainSetMapping, labelToImageMapping
           torch.save({
                       'epoch': i,
                       'model_state_dict': model.state_dict(),
-                      'optimizer_state_dict': optimizer.state_dict()
+                      'optimizer_state_dict': optimizer.state_dict(),
+                      'scheduler_state_dict': scheduler.state_dict()
                       }, "checkpoint.pth")
           
 
       print("Total time:", (time() - start))
       
       if i % 15 == 0:
-          with open("validationAccuracyList.picke", "wb") as f:
+          with open("validationAccuracyList.pickle", "wb") as f:
               pickle.dump(validationAccuracyList, f)
               
-          with open("testAccuracyList.picke", "wb") as f:
+          with open("testAccuracyList.pickle", "wb") as f:
               pickle.dump(testAccuracyList, f)
               
-          with open("lossListTrain.picke", "wb") as f:
+          with open("lossListTrain.pickle", "wb") as f:
               pickle.dump(lossListTrain, f)
               
-          with open("lossListLFW.picke", "wb") as f:
+          with open("lossListLFW.pickle", "wb") as f:
               pickle.dump(lossListLFW, f)
       
       trainSet.regenerateTriplets()
 
-  with open("validationAccuracyList.picke", "wb") as f:
+  with open("validationAccuracyList.pickle", "wb") as f:
       pickle.dump(validationAccuracyList, f)
       
-  with open("testAccuracyList.picke", "wb") as f:
+  with open("testAccuracyList.pickle", "wb") as f:
       pickle.dump(testAccuracyList, f)
       
-  with open("lossListTrain.picke", "wb") as f:
+  with open("lossListTrain.pickle", "wb") as f:
       pickle.dump(lossListTrain, f)
       
-  with open("lossListLFW.picke", "wb") as f:
+  with open("lossListLFW.pickle", "wb") as f:
       pickle.dump(lossListLFW, f)
 
 
