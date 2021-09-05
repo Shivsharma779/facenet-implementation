@@ -1,8 +1,12 @@
 ## FaceNet implementation
 ### Problem satement
-In this Project we implement FaceNet system, that directly learns a mapping from face images to a compact Euclidean space where distances directly correspond to a measure of face similarity.
+In this Project we implemented [Google's FaceNet](https://arxiv.org/abs/1503.03832) , that directly learns a mapping from face images to a compact Euclidean space where distances directly correspond to a measure of face similarity.
 
 ### [Presentation](https://docs.google.com/presentation/d/e/2PACX-1vTihbOz33Oyu4n9txbVQfVdXswTRGtKJV3TwjcKYQpHszRszCh3j8XFooEc0wFaiO6WGFzAoh2WACxU/pub?start=false&loop=false&delayms=5000)
+
+### Datasets
+- [Training Dataset](https://www.kaggle.com/baohoa/modified-vggface2?select=train_refined_resized)
+- [Testing Dataset](http://vis-www.cs.umass.edu/lfw/#deepfunnel-anchor)
 
 ### Steps
 
@@ -16,8 +20,20 @@ bash scripts.sh
 - Start the training script
 
 ```
-python train.py
+python3 ./Code/train.py
+```
+
+- Evaluate Results
+```
+python3 ./Code/eval_model.py
 ```
 
 
 Model will be generated under the name `checkpoint.pth`
+### Results
+|             | Margin = 1.7                     | Margin = 1.9                     |
+| ----------- | -------------------------------- | -------------------------------- |
+| kNN         | 75.5                             | 79.55 (VggFace2)                 |
+| Contrastive | 88.23                            | 89.33 (LFW)                      |
+| Rank5       | 57.9(LFW) / 70.17 (VggFace2)     | 57.85 (LFW) / 72.33 (VggFace2)   |
+| Loss        | 0.1013 (LFW) / 0.0391 (VggFace2) | 0.1867 (LFW) / 0.1111 (VggFace2) |
