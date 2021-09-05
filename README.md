@@ -20,7 +20,12 @@ bash scripts.sh
 - Start the training script
 
 ```
-python3 train.py
+python3 ./Code/train.py
+```
+
+- Evaluate Results
+```
+python3 ./Code/eval_model.py
 ```
 
 
