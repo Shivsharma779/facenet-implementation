@@ -31,9 +31,42 @@ python3 ./Code/eval_model.py
 
 Model will be generated under the name `checkpoint.pth`
 ### Results
+- #### Summary
 |             | Margin = 1.7                     | Margin = 1.9                     |
 | ----------- | -------------------------------- | -------------------------------- |
 | kNN         | 75.5                             | 79.55 (VggFace2)                 |
 | Contrastive | 88.23                            | 89.33 (LFW)                      |
 | Rank5       | 57.9(LFW) / 70.17 (VggFace2)     | 57.85 (LFW) / 72.33 (VggFace2)   |
 | Loss        | 0.1013 (LFW) / 0.0391 (VggFace2) | 0.1867 (LFW) / 0.1111 (VggFace2) |
+- #### TSNE Plot of different identities in VGG Face 2 dataset
+<p align="center">
+<img src="./Results/TSNE.png" alt="TSNE plot" width="400"/>
+</p>
+
+-  ####  RESNET50 RESULTS(MARGIN:0.7)
+
+      - Accuracy: 
+      <p align="center">
+      <img src="./Results/margin0.7_acc.png" alt="TSNE plot" width="400"/>
+      </p>
+    
+      - Loss
+      <p align="center">
+      <img src="./Results/margin0.7_loss.png" alt="TSNE plot" width="400"/>
+      </p>
+
+-  ####  RESNET50 RESULTS(MARGIN: 1.9)
+
+      - Accuracy: 
+      <p align="center">
+      <img src="./Results/margin1.9_acc.png" alt="TSNE plot" width="400"/>
+      </p>
+    
+      - Loss
+      <p align="center">
+      <img src="./Results/margin1.9_loss.png" alt="TSNE plot" width="400"/>
+      </p>
+
+
+
+
