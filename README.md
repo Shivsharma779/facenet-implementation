@@ -26,3 +26,9 @@ python3 train.py
 
 Model will be generated under the name `checkpoint.pth`
 ### Results
+|             | Margin = 1.7                     | Margin = 1.9                     |
+| ----------- | -------------------------------- | -------------------------------- |
+| kNN         | 75.5                             | 79.55 (VggFace2)                 |
+| Contrastive | 88.23                            | 89.33 (LFW)                      |
+| Rank5       | 57.9(LFW) / 70.17 (VggFace2)     | 57.85 (LFW) / 72.33 (VggFace2)   |
+| Loss        | 0.1013 (LFW) / 0.0391 (VggFace2) | 0.1867 (LFW) / 0.1111 (VggFace2) |
