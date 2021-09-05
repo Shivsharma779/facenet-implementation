@@ -1,5 +1,7 @@
 ## FaceNet implementation
 
+### Problem satement
+In this Project we implement FaceNet system, that directly learns a mapping from face images to a compact Euclidean space where distances directly correspond to a measure of face similarity.
 
 ### Steps
 
