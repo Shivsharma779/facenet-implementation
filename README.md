@@ -20,8 +20,9 @@ bash scripts.sh
 - Start the training script
 
 ```
-python train.py
+python3 train.py
 ```
 
 
 Model will be generated under the name `checkpoint.pth`
+### Results
